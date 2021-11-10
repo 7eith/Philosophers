@@ -6,7 +6,7 @@
 #    By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/10 15:56:49 by amonteli          #+#    #+#              #
-#    Updated: 2021/11/10 15:57:56 by amonteli         ###   ########lyon.fr    #
+#    Updated: 2021/11/10 17:07:11 by amonteli         ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ CC				=		gcc
 CFLAGS 			= 		-Wall -Wextra -Werror
 
 SRCS			=		\
-						main.c
+						main.c utilities.c
 
 OBJS			= 		$(addprefix srcs/, $(SRCS:.c=.o))
 
