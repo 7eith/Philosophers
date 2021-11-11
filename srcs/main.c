@@ -6,7 +6,7 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/10 15:56:01 by amonteli          #+#    #+#             */
-/*   Updated: 2021/11/10 20:42:14 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/11/11 18:08:06 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,28 @@ int	parse_args(t_global *global, char **args, int args_count)
 
 int	init(t_global *global)
 {
+	pthread_mutex_init(&global->log_mtx, NULL);
 
+	return (1);
+}
+
+int get_time()
+{
+	struct timeval	current_time;
+
+	gettimeofday(&current_time, NULL);
+	return (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
+}
+
+void	*launch_philo(void *data)
+{
+	t_philo *philosopher;
+
+	philosopher = data;
+	if (philosopher->identifier % 2)
+		usleep(1500);
+	// TODO: check if time to die < eat + sleep + think
+	return (philosopher);
 }
 
 int	main(int args_count, char **args)
@@ -46,6 +67,7 @@ int	main(int args_count, char **args)
 	t_global	global;
 	t_philo		*philosophers;
 	int			index;
+	pthread_t	*threads;
 
 	index = 0;
 	if (args_count < 5 || args_count > 6)
@@ -53,11 +75,27 @@ int	main(int args_count, char **args)
 	if (!parse_args(&global, args, args_count))
 		return (errors("failed to parse"));
 	philosophers = malloc(sizeof(t_philo) * global.philo_count);
+	if (!philosophers)
+		return (-1);
 	while (index < global.philo_count)
 	{
 		philosophers[index].global = &global;
-		philosophers[index].identifier = index;
+		philosophers[index].identifier = index + 1;
 		philosophers[index].dead = 0;
+		pthread_mutex_init(&philosophers[index].r_fork, NULL);
+		if (index != 0)
+			philosophers[index].l_fork = &philosophers[index - 1].r_fork;
+		index++;
 	}
+	philosophers[index].l_fork = &philosophers[index].r_fork;
+	threads = malloc(sizeof(pthread_t) * global.philo_count);
+	if (!threads)
+		return (-1);
+	index = 0;
+	while (index < global.philo_count)
+	{
+		pthread_create(&threads[index], NULL, launch_philo, &philosophers[index]);
+	}
+	printf("time={%d}\n", get_time());
 	return (1);
 }
