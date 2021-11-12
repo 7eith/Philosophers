@@ -6,7 +6,7 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/10 15:56:01 by amonteli          #+#    #+#             */
-/*   Updated: 2021/11/11 18:08:06 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/11/12 19:21:03 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,23 @@ int	errors(char *error)
 {
 	printf("Error: {%s}\n", error);
 	return (0);
+}
+
+int get_time()
+{
+	struct timeval	current_time;
+
+	gettimeofday(&current_time, NULL);
+	return (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
+}
+
+void	print_sleep(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->global->log_mtx);
+	printf("\e[91m%lld \e[0m| Thread %d is sleeping 💤\n", get_time()
+		- philo->global->start, philo->identifier);
+	pthread_mutex_unlock(&philo->global->log_mtx);
+	usleep(philo->global->time_to_sleep * 1000);
 }
 
 int	parse_args(t_global *global, char **args, int args_count)
@@ -36,21 +53,6 @@ int	parse_args(t_global *global, char **args, int args_count)
 	return (1);
 }
 
-int	init(t_global *global)
-{
-	pthread_mutex_init(&global->log_mtx, NULL);
-
-	return (1);
-}
-
-int get_time()
-{
-	struct timeval	current_time;
-
-	gettimeofday(&current_time, NULL);
-	return (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
-}
-
 void	*launch_philo(void *data)
 {
 	t_philo *philosopher;
@@ -58,6 +60,7 @@ void	*launch_philo(void *data)
 	philosopher = data;
 	if (philosopher->identifier % 2)
 		usleep(1500);
+	print_sleep(philosopher);
 	// TODO: check if time to die < eat + sleep + think
 	return (philosopher);
 }
@@ -77,6 +80,7 @@ int	main(int args_count, char **args)
 	philosophers = malloc(sizeof(t_philo) * global.philo_count);
 	if (!philosophers)
 		return (-1);
+	pthread_mutex_init(&global.log_mtx, NULL);
 	while (index < global.philo_count)
 	{
 		philosophers[index].global = &global;
@@ -92,6 +96,7 @@ int	main(int args_count, char **args)
 	if (!threads)
 		return (-1);
 	index = 0;
+	global.start = get_time();
 	while (index < global.philo_count)
 	{
 		pthread_create(&threads[index], NULL, launch_philo, &philosophers[index]);
