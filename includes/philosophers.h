@@ -6,7 +6,7 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/10 15:57:15 by amonteli          #+#    #+#             */
-/*   Updated: 2021/11/11 17:55:51 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/11/29 19:06:05 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ typedef struct s_philo
 	t_global	*global;
 	int			identifier;
 	int			dead;
+	int			last_time_eat;
 	pthread_mutex_t	*l_fork;
 	pthread_mutex_t	r_fork;
 }				t_philo;
@@ -48,5 +49,8 @@ typedef struct s_philo
  */
 
 int		ft_atoi(char *str);
+int		errors(char *error);
+int		get_time();
+int		is_integer(char *str);
 
 #endif

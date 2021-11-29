@@ -6,31 +6,24 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/10 15:56:01 by amonteli          #+#    #+#             */
-/*   Updated: 2021/11/12 19:21:03 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/11/29 18:32:03 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-int	errors(char *error)
-{
-	printf("Error: {%s}\n", error);
-	return (0);
-}
-
-int get_time()
-{
-	struct timeval	current_time;
-
-	gettimeofday(&current_time, NULL);
-	return (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
-}
-
 void	print_sleep(t_philo *philo)
 {
 	pthread_mutex_lock(&philo->global->log_mtx);
-	printf("\e[91m%lld \e[0m| Thread %d is sleeping 💤\n", get_time()
-		- philo->global->start, philo->identifier);
+	printf("[%lld - %d] Sleeping\n", get_time() - philo->global->start, philo->identifier);
+	pthread_mutex_unlock(&philo->global->log_mtx);
+	usleep(philo->global->time_to_sleep * 1000);
+}
+
+void	print_eat(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->global->log_mtx);
+	printf("[%lld - %d] Eating\n", get_time() - philo->global->start, philo->identifier);
 	pthread_mutex_unlock(&philo->global->log_mtx);
 	usleep(philo->global->time_to_sleep * 1000);
 }
@@ -53,6 +46,23 @@ int	parse_args(t_global *global, char **args, int args_count)
 	return (1);
 }
 
+void	eat(t_philo *philosopher)
+{
+	if (!philosopher->identifier % 2)
+	{
+		pthread_mutex_lock(philosopher->l_fork);
+
+		// pthread_mutex_lock(&philosopher->r_fork);
+		// pthread_mutex_lock(&philosopher->r_fork);
+
+	}
+	else
+	{
+		pthread_mutex_lock(&philosopher->r_fork);
+	}
+	print_eat(philosopher);
+}
+
 void	*launch_philo(void *data)
 {
 	t_philo *philosopher;
@@ -60,7 +70,11 @@ void	*launch_philo(void *data)
 	philosopher = data;
 	if (philosopher->identifier % 2)
 		usleep(1500);
-	print_sleep(philosopher);
+	while (!philosopher->dead)
+	{
+		print_sleep(philosopher);
+		eat(philosopher);
+	}
 	// TODO: check if time to die < eat + sleep + think
 	return (philosopher);
 }
@@ -72,15 +86,16 @@ int	main(int args_count, char **args)
 	int			index;
 	pthread_t	*threads;
 
-	index = 0;
 	if (args_count < 5 || args_count > 6)
 		return (errors("use ./philo <philos> <time_to_die> <time_to_eat> <time_to_sleep> [max_eat_phase]"));
 	if (!parse_args(&global, args, args_count))
 		return (errors("failed to parse"));
+	printf("{%d}\n", global.philo_count);
 	philosophers = malloc(sizeof(t_philo) * global.philo_count);
 	if (!philosophers)
 		return (-1);
 	pthread_mutex_init(&global.log_mtx, NULL);
+	index = 0;
 	while (index < global.philo_count)
 	{
 		philosophers[index].global = &global;
@@ -91,7 +106,7 @@ int	main(int args_count, char **args)
 			philosophers[index].l_fork = &philosophers[index - 1].r_fork;
 		index++;
 	}
-	philosophers[index].l_fork = &philosophers[index].r_fork;
+	philosophers[index - 1].l_fork = &philosophers[index - 1].r_fork;
 	threads = malloc(sizeof(pthread_t) * global.philo_count);
 	if (!threads)
 		return (-1);
@@ -100,7 +115,11 @@ int	main(int args_count, char **args)
 	while (index < global.philo_count)
 	{
 		pthread_create(&threads[index], NULL, launch_philo, &philosophers[index]);
+		index++;
 	}
+	// pthread_join()
 	printf("time={%d}\n", get_time());
+	while (1)
+		;
 	return (1);
 }

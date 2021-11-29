@@ -6,7 +6,7 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/10 17:00:02 by amonteli          #+#    #+#             */
-/*   Updated: 2021/11/10 20:35:49 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/11/29 18:26:33 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,4 +52,18 @@ int	ft_atoi(char *str)
 		i++;
 	}
 	return (number * neg);
+}
+
+int	errors(char *error)
+{
+	printf("Error: {%s}\n", error);
+	return (0);
+}
+
+int get_time()
+{
+	struct timeval	current_time;
+
+	gettimeofday(&current_time, NULL);
+	return (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
 }
