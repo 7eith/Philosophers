@@ -6,7 +6,7 @@
 #    By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/10 15:56:49 by amonteli          #+#    #+#              #
-#    Updated: 2021/11/26 15:36:49 by amonteli         ###   ########lyon.fr    #
+#    Updated: 2021/12/01 03:45:50 by amonteli         ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,10 +19,10 @@ HEADERS			=		includes/philosophers.h
 
 CC				=		gcc
 
-CFLAGS 			= 		-Wall -Wextra -Werror -g
+CFLAGS 			= 		-Wall -Wextra -Werror -g -fsanitize=address
 
 SRCS			=		\
-						main.c utilities.c
+						main.c utilities.c tasks.c
 
 OBJS			= 		$(addprefix srcs/, $(SRCS:.c=.o))
 

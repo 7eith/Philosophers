@@ -6,7 +6,7 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/10 15:57:15 by amonteli          #+#    #+#             */
-/*   Updated: 2021/12/01 01:32:59 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/12/01 05:24:07 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,8 @@ typedef struct s_global
 	int					time_to_die;
 	int					time_to_eat;
 	int					time_to_sleep;
-	int					eat_count;
+	int					max_eat_count;
+
 	int					has_die;
 	long long			start;
 	pthread_mutex_t		log_mtx;
@@ -47,6 +48,7 @@ typedef struct s_philo
 	int					dead;
 	int					last_time_eat;
 	int					eat;
+	int					has_eat;
 	int					max_eat;
 	pthread_mutex_t		*l_fork;
 	pthread_mutex_t		r_fork;
@@ -60,5 +62,8 @@ int		ft_atoi(char *str);
 int		errors(char *error);
 int		get_time(void);
 int		is_integer(char *str);
+void	ps_log(t_philo *philo, char *type);
+
+void	*launch_tasks(void *data);
 
 #endif

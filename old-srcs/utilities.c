@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/01 01:53:18 by amonteli          #+#    #+#             */
-/*   Updated: 2021/12/01 05:51:44 by amonteli         ###   ########lyon.fr   */
+/*   Created: 2021/11/10 17:00:02 by amonteli          #+#    #+#             */
+/*   Updated: 2021/11/29 18:26:33 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,16 +66,4 @@ int get_time()
 
 	gettimeofday(&current_time, NULL);
 	return (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
-}
-
-void	ps_log(t_philo *philo, char *type)
-{
-	pthread_mutex_lock(&philo->global->log_mtx);
-	printf("| %*lld | %*d has %s\n", 4, get_time() - philo->global->start, 1, philo->identifier, type);
-	if (type[0] != 'd')
-	{
-		pthread_mutex_unlock(&philo->global->log_mtx);
-	}
-	else
-		exit(0);
 }
