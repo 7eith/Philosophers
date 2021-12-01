@@ -6,27 +6,11 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/10 15:56:01 by amonteli          #+#    #+#             */
-/*   Updated: 2021/11/29 18:32:03 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/12/01 01:33:24 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
-
-void	print_sleep(t_philo *philo)
-{
-	pthread_mutex_lock(&philo->global->log_mtx);
-	printf("[%lld - %d] Sleeping\n", get_time() - philo->global->start, philo->identifier);
-	pthread_mutex_unlock(&philo->global->log_mtx);
-	usleep(philo->global->time_to_sleep * 1000);
-}
-
-void	print_eat(t_philo *philo)
-{
-	pthread_mutex_lock(&philo->global->log_mtx);
-	printf("[%lld - %d] Eating\n", get_time() - philo->global->start, philo->identifier);
-	pthread_mutex_unlock(&philo->global->log_mtx);
-	usleep(philo->global->time_to_sleep * 1000);
-}
 
 int	parse_args(t_global *global, char **args, int args_count)
 {
@@ -42,12 +26,27 @@ int	parse_args(t_global *global, char **args, int args_count)
 		global->eat_count = ft_atoi(args[5]);
 	if (global->philo_count == 0 || global->time_to_die == 0 || global->time_to_eat == 0 || global->time_to_sleep == 0 || global->eat_count == 0)
 		return (0);
-	printf("params=[{%d}, {%d}, {%d}, {%d}, {%d}]", global->philo_count, global->time_to_die, global->time_to_eat, global->time_to_sleep, global->eat_count);
+	printf("[DEBUG] params=[{%d}, {%d}, {%d}, {%d}, {%d}]", global->philo_count, global->time_to_die, global->time_to_eat, global->time_to_sleep, global->eat_count);
 	return (1);
+}
+
+void	ps_log(t_philo *philosopher, char *type)
+{
+	pthread_mutex_lock(&philosopher->global->log_mtx);
+	printf("| %*lld | %.*d has %s\n", 4, get_time() - philosopher->global->start, philosopher->global->philo_count, philosopher->identifier, type);
+	pthread_mutex_unlock(&philosopher->global->log_mtx);
 }
 
 void	eat(t_philo *philosopher)
 {
+	philosopher->eat = 0;
+	if (philosopher->global->philo_count == 1)
+	{
+		usleep((philosopher->global->time_to_die) * 1000);
+		ps_log(philosopher, A_DIE);
+		philosopher->dead = 1;
+		return ;
+	}
 	if (!philosopher->identifier % 2)
 	{
 		pthread_mutex_lock(philosopher->l_fork);
@@ -60,7 +59,7 @@ void	eat(t_philo *philosopher)
 	{
 		pthread_mutex_lock(&philosopher->r_fork);
 	}
-	print_eat(philosopher);
+	ps_log(philosopher, A_EAT);
 }
 
 void	*launch_philo(void *data)
@@ -72,7 +71,7 @@ void	*launch_philo(void *data)
 		usleep(1500);
 	while (!philosopher->dead)
 	{
-		print_sleep(philosopher);
+		// ps_log(philosopher, A_THINK);
 		eat(philosopher);
 	}
 	// TODO: check if time to die < eat + sleep + think
@@ -101,6 +100,8 @@ int	main(int args_count, char **args)
 		philosophers[index].global = &global;
 		philosophers[index].identifier = index + 1;
 		philosophers[index].dead = 0;
+		philosophers[index].eat = 0;
+		philosophers[index].max_eat = -1;
 		pthread_mutex_init(&philosophers[index].r_fork, NULL);
 		if (index != 0)
 			philosophers[index].l_fork = &philosophers[index - 1].r_fork;
@@ -117,9 +118,8 @@ int	main(int args_count, char **args)
 		pthread_create(&threads[index], NULL, launch_philo, &philosophers[index]);
 		index++;
 	}
-	// pthread_join()
-	printf("time={%d}\n", get_time());
-	while (1)
-		;
+	index = 0;
+	while (index < global.philo_count)
+		pthread_join(threads[index++], NULL);
 	return (1);
 }
