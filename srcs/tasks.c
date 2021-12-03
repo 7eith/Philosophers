@@ -6,17 +6,16 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/01 02:17:15 by amonteli          #+#    #+#             */
-/*   Updated: 2021/12/01 05:52:21 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/12/03 19:55:42 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-int		is_alive(t_philo *philo)
+int	is_alive(t_philo *philo)
 {
-	if (philo->global->has_die)
-		return (0);
-	if (((philo->global->start - get_time()) - philo->last_time_eat) > philo->global->time_to_die)
+	if (((get_time() - philo->global->start)
+			- philo->last_time_eat) > philo->global->time_to_die)
 	{
 		if (!philo->global->has_die)
 		{
@@ -25,32 +24,31 @@ int		is_alive(t_philo *philo)
 			return (0);
 		}
 	}
+	if (philo->global->has_die)
+		return (0);
 	return (1);
 }
 
-void	unsufissent_forks(t_philo *philo)
+int	can_live(t_philo *philo)
 {
-	usleep(philo->global->time_to_die * 1000);
-	ps_log(philo, A_DIE);
-	exit(0);
-}
-
-int		can_live(t_philo *philo)
-{
-	long	now;
-
-	now = (get_time() - philo->global->start) - philo->last_time_eat;
-	if (!philo->has_eat && (now + philo->global->time_to_eat > philo->global->time_to_die))
+	philo->now = (get_time() - philo->global->start) - philo->last_time_eat;
+	if (!philo->has_eat && (philo->now
+			+ philo->global->time_to_eat > philo->global->time_to_die))
 	{
+		if (philo->global->has_die)
+			return (0);
 		philo->global->has_die = 1;
-		usleep((philo->global->time_to_die - now) * 1000);
+		usleep((philo->global->time_to_die - philo->now) * 1000);
 		ps_log(philo, A_DIE);
 		return (0);
 	}
-	else if (philo->has_eat && (now + philo->global->time_to_sleep > philo->global->time_to_die))
+	else if (philo->has_eat && (philo->now
+			+ philo->global->time_to_sleep > philo->global->time_to_die))
 	{
+		if (philo->global->has_die)
+			return (0);
 		philo->global->has_die = 1;
-		usleep((philo->global->time_to_die - now) * 1000);
+		usleep((philo->global->time_to_die - philo->now) * 1000);
 		ps_log(philo, A_DIE);
 		return (0);
 	}
@@ -70,7 +68,6 @@ void	sleep_task(t_philo *philo)
 
 void	eat_task(t_philo *philo)
 {
-	philo->has_eat = 0;
 	if (philo->global->philo_count == 1)
 		unsufissent_forks(philo);
 	pthread_mutex_lock(philo->l_fork);
@@ -81,6 +78,7 @@ void	eat_task(t_philo *philo)
 		pthread_mutex_unlock(philo->l_fork);
 		return ;
 	}
+	ps_log(philo, A_TAKE);
 	ps_log(philo, A_TAKE);
 	ps_log(philo, A_EAT);
 	if (!can_live(philo))
@@ -94,7 +92,7 @@ void	eat_task(t_philo *philo)
 	pthread_mutex_unlock(philo->l_fork);
 	philo->eat++;
 	philo->has_eat = 1;
-	philo->last_time_eat = get_time();
+	philo->last_time_eat = (get_time() - philo->global->start);
 }
 
 void	*launch_tasks(void *data)
@@ -104,6 +102,7 @@ void	*launch_tasks(void *data)
 	philo = data;
 	while (philo->global->max_eat_count == -1 || philo->eat <= philo->max_eat)
 	{
+		philo->has_eat = 0;
 		eat_task(philo);
 		if (philo->global->has_die)
 			return (0);

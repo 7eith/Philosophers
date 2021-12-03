@@ -6,7 +6,7 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/01 01:53:18 by amonteli          #+#    #+#             */
-/*   Updated: 2021/12/01 05:51:44 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/12/03 19:50:06 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int	errors(char *error)
 	return (0);
 }
 
-int get_time()
+unsigned long	get_time(void)
 {
 	struct timeval	current_time;
 
@@ -68,14 +68,9 @@ int get_time()
 	return (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
 }
 
-void	ps_log(t_philo *philo, char *type)
+void	unsufissent_forks(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->global->log_mtx);
-	printf("| %*lld | %*d has %s\n", 4, get_time() - philo->global->start, 1, philo->identifier, type);
-	if (type[0] != 'd')
-	{
-		pthread_mutex_unlock(&philo->global->log_mtx);
-	}
-	else
-		exit(0);
+	usleep(philo->global->time_to_die * 1000);
+	ps_log(philo, A_DIE);
+	exit(0);
 }

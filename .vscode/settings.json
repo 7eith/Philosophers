@@ -1,0 +1,8 @@
+{
+	"files.associations": {
+		"iomanip": "c",
+		"locale": "c",
+		"philosophers.h": "c"
+	},
+	"C_Cpp.errorSquiggles": "Disabled"
+}
