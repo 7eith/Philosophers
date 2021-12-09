@@ -6,7 +6,7 @@
 /*   By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/01 02:17:15 by amonteli          #+#    #+#             */
-/*   Updated: 2021/12/03 19:55:42 by amonteli         ###   ########lyon.fr   */
+/*   Updated: 2021/12/09 17:04:50 by amonteli         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ void	*launch_tasks(void *data)
 	t_philo		*philo;
 
 	philo = data;
-	while (philo->global->max_eat_count == -1 || philo->eat <= philo->max_eat)
+	while (philo->global->max_eat_count == -1 || philo->eat < philo->max_eat)
 	{
 		philo->has_eat = 0;
 		eat_task(philo);

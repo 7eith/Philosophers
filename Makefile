@@ -6,7 +6,7 @@
 #    By: amonteli <amonteli@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/10 15:56:49 by amonteli          #+#    #+#              #
-#    Updated: 2021/12/01 03:45:50 by amonteli         ###   ########lyon.fr    #
+#    Updated: 2021/12/09 17:01:30 by amonteli         ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ HEADERS			=		includes/philosophers.h
 
 CC				=		gcc
 
-CFLAGS 			= 		-Wall -Wextra -Werror -g -fsanitize=address
+CFLAGS 			= 		-Wall -Wextra -Werror
 
 SRCS			=		\
 						main.c utilities.c tasks.c
